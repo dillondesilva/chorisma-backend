@@ -15,7 +15,7 @@ Resources:
   HelloWorldFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
-      CodeUri: hello_world/
+      CodeUri: app/
       Handler: app.lambda_handler
       Runtime: python3.9
       Architectures:
@@ -25,6 +25,20 @@ Resources:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /hello
+            Method: get
+  RecognizeChordFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: app/
+      Handler: recognize_chord.lambda_handler
+      Runtime: python3.9
+      Architectures:
+      - x86_64
+      Events:
+        HelloWorld:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /recognize_chord
             Method: get
 
   ApplicationResourceGroup:
@@ -53,3 +67,14 @@ Outputs:
   HelloWorldFunctionIamRole:
     Description: Implicit IAM Role created for Hello World function
     Value: !GetAtt HelloWorldFunctionRole.Arn
+
+  RecognizeChordApi:
+    Description: API Gateway endpoint URL for Prod stage for RecognizeChord function
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+  RecognizeChordFunction:
+    Description: RecognizeChord Lambda Function ARN
+    Value: !GetAtt RecognizeChordFunction.Arn
+  HelloWorldFunctionIamRole:
+    Description: Implicit IAM Role created for RecognizeChord function
+    Value: !GetAtt RecognizeChordFunctionRole.Arn
+
