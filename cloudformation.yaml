@@ -6,41 +6,57 @@ Description: >
   Sample SAM Template for chorisma-app-backend
 
 # More info about Globals: https://github.com/awslabs/serverless-application-model/blob/master/docs/globals.rst
+# CORS is enabled to allow requests from all resources. This is UNSAFE
+# but to be fixed later
 Globals:
+  Api:
+    Cors:
+        AllowMethods: "'GET,POST,OPTIONS'"
+        AllowHeaders: "'content-type'"
+        AllowOrigin: "'*'"
   Function:
-    Timeout: 3
-    MemorySize: 128
+    Timeout: 120
+    MemorySize: 1024
 
 Resources:
-  HelloWorldFunction:
-    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+  LibsLayer:
+    Type: AWS::Serverless::LayerVersion
     Properties:
-      CodeUri: app/
-      Handler: app.lambda_handler
-      Runtime: python3.9
-      Architectures:
-      - x86_64
-      Events:
-        HelloWorld:
-          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
-          Properties:
-            Path: /hello
-            Method: get
+      ContentUri: libs/
+      CompatibleRuntimes:
+        - python3.8
+    Metadata:
+      BuildMethod: python3.8
   RecognizeChordFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
       CodeUri: app/
       Handler: recognize_chord.lambda_handler
-      Runtime: python3.9
+      Runtime: python3.8
       Architectures:
       - x86_64
       Events:
-        HelloWorld:
+        RecognizeChord:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /recognize_chord
+            Method: post
+      Layers:
+        - !Ref LibsLayer
+  GetPresignedURLFunction:
+    Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
+    Properties:
+      CodeUri: app/
+      Handler: get_presigned_url.lambda_handler
+      Runtime: python3.8
+      Architectures:
+      - x86_64
+      Events:
+        RecognizeChord:
+          Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
+          Properties:
+            Path: /get_presigned_url
             Method: get
-
   ApplicationResourceGroup:
     Type: AWS::ResourceGroups::Group
     Properties:
@@ -58,23 +74,21 @@ Outputs:
   # ServerlessRestApi is an implicit API created out of Events key under Serverless::Function
   # Find out more about other implicit resources you can reference within SAM
   # https://github.com/awslabs/serverless-application-model/blob/master/docs/internals/generated_resources.rst#api
-  HelloWorldApi:
-    Description: API Gateway endpoint URL for Prod stage for Hello World function
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
-  HelloWorldFunction:
-    Description: Hello World Lambda Function ARN
-    Value: !GetAtt HelloWorldFunction.Arn
-  HelloWorldFunctionIamRole:
-    Description: Implicit IAM Role created for Hello World function
-    Value: !GetAtt HelloWorldFunctionRole.Arn
-
   RecognizeChordApi:
     Description: API Gateway endpoint URL for Prod stage for RecognizeChord function
-    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/hello/"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/recognize_chord/"
   RecognizeChordFunction:
     Description: RecognizeChord Lambda Function ARN
     Value: !GetAtt RecognizeChordFunction.Arn
-  HelloWorldFunctionIamRole:
-    Description: Implicit IAM Role created for RecognizeChord function
-    Value: !GetAtt RecognizeChordFunctionRole.Arn
+  GetPresignedURLApi:
+    Description: API Gateway endpoint URL for Prod stage for GetPresignedURL function
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/get_presigned_url/"
+  GetPresignedURLFunction:
+    Description: GetPresignedURL Lambda Function ARN
+    Value: !GetAtt GetPresignedURLFunction.Arn
+  MyLibLayer:
+    Description: "Layer containing librosa and other dependencies"
+    Value: !Ref LibsLayer
+    Export:
+      Name: !Sub '${AWS::StackName}-LibsLayer'
 

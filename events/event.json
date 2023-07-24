@@ -1,5 +1,5 @@
 {
-  "body": "{\"message\": \"hello world\"}",
+  "body": "{\"resourceLocation\": \"listened_chords/Jn6jg25pVLpfNs37rBZEY8\"}",
   "resource": "/hello",
   "path": "/hello",
   "httpMethod": "GET",
