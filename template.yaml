@@ -19,46 +19,46 @@ Globals:
     MemorySize: 1024
 
 Resources:
-  LibsLayer:
-    Type: AWS::Serverless::LayerVersion
-    Properties:
-      ContentUri: libs/
-      CompatibleRuntimes:
-        - python3.8
-    Metadata:
-      BuildMethod: python3.8
   RecognizeChordFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
+      PackageType: Image
       CodeUri: app/
-      Handler: recognize_chord.lambda_handler
-      Runtime: python3.8
       Architectures:
       - x86_64
+      Policies:
+        - S3FullAccessPolicy:
+            BucketName: chorisma-app
       Events:
         RecognizeChord:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /recognize_chord
             Method: post
-      Layers:
-        - !Ref LibsLayer
+    Metadata:
+      DockerTag: recognize_chord
+      DockerContext: .
+      Dockerfile: Dockerfile
   GetPresignedURLFunction:
     Type: AWS::Serverless::Function # More info about Function Resource: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
     Properties:
+      PackageType: Image
       CodeUri: app/
-      Handler: get_presigned_url.lambda_handler
-      Runtime: python3.8
       Architectures:
       - x86_64
+      Policies:
+        - S3FullAccessPolicy:
+            BucketName: chorisma-app
       Events:
         RecognizeChord:
           Type: Api # More info about API Event Source: https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#api
           Properties:
             Path: /get_presigned_url
             Method: get
-      Layers:
-        - !Ref LibsLayer
+    Metadata:
+      DockerTag: recognize_chord
+      DockerContext: .
+      Dockerfile: GetPresignedURL.Dockerfile
   ApplicationResourceGroup:
     Type: AWS::ResourceGroups::Group
     Properties:
@@ -88,9 +88,3 @@ Outputs:
   GetPresignedURLFunction:
     Description: GetPresignedURL Lambda Function ARN
     Value: !GetAtt GetPresignedURLFunction.Arn
-  MyLibLayer:
-    Description: "Layer containing librosa and other dependencies"
-    Value: !Ref LibsLayer
-    Export:
-      Name: !Sub '${AWS::StackName}-LibsLayer'
-

@@ -29,10 +29,10 @@ def lambda_handler(event, context):
     try:
         key = json.loads(event["body"])["resourceLocation"]
         s3_user_audio_obj = s3_resource.Object("chorisma-app", key)
-        s3_user_audio_obj.download_file(f"/tmp/temp.mp3")
+        s3_user_audio_obj.download_file(f"/tmp/temp.wav")
 
         # Extract chromagram of recorded audio
-        extracted_chromagram = get_chromagram(f"/tmp/temp.mp3").reshape(1, -1)
+        extracted_chromagram = get_chromagram(f"/tmp/temp.wav").reshape(1, -1)
 
         # Model Inference
         predicted_chord = latest_model.predict(extracted_chromagram)[0]

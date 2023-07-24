@@ -19,7 +19,8 @@ confirm_changeset = true
 resolve_s3 = true
 s3_prefix = "chorisma-app-backend"
 region = "ap-southeast-2"
-image_repositories = []
+image_repositories = ["RecognizeChordFunction=698361322823.dkr.ecr.ap-southeast-2.amazonaws.com/chorisma-app", "GetPresignedURLFunction=698361322823.dkr.ecr.ap-southeast-2.amazonaws.com/chorisma-app"]
+disable_rollback = true
 
 [default.package.parameters]
 resolve_s3 = true
